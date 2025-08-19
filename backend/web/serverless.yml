@@ -1,0 +1,48 @@
+# Serverless Framework配置文件
+service: stock-fund-api
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    PG_HOST: ${env:PG_HOST}
+    PG_HOST_OUT: ${env:PG_HOST_OUT}
+    PG_PORT: ${env:PG_PORT, '5432'}
+    PG_USER: ${env:PG_USER}
+    PG_PASSWORD: ${env:PG_PASSWORD}
+    PG_DB: ${env:PG_DB}
+    REQUEST_ID_HEADER: ${env:REQUEST_ID_HEADER, 'X-Request-ID'}
+
+functions:
+  api:
+    handler: main.main
+    timeout: 30
+    memorySize: 512
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+      - http:
+          path: /stockinfo
+          method: get
+          cors: true
+      - http:
+          path: /fundinfo
+          method: get
+          cors: true
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    slim: true
+    strip: false

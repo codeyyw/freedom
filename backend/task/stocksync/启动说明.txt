@@ -1,0 +1,160 @@
+股票数据同步系统 - 启动说明
+================================
+
+🔄 版本信息：v1.0 (初始版本)
+- 支持A股、港股、美股实时行情数据同步
+- 模块化架构设计，包含数据处理核心模块
+- 智能市场开盘状态检测
+- StockDataProcessor类封装数据处理逻辑
+- 批量数据库操作优化
+- 完善的错误处理和重试机制
+- 基于北京时间的准确时区处理
+
+📁 文件说明：
+- index.py            # 主程序入口
+- data_processor.py   # 数据处理核心模块（新增）
+- market_status.py    # 市场开盘状态检测模块（重命名）
+- stock_cleaners.py   # 股票数据清洗模块
+- db_operations.py    # 数据库操作模块
+- config.py           # 配置文件
+- test/               # 测试目录
+  ├── test_integration.py    # 集成测试脚本
+  ├── test_imports.py        # 模块导入测试脚本
+  ├── performance_test.py    # 性能测试脚本
+  ├── test_market_status.py  # 市场状态测试脚本
+  ├── test_data_cleaning.py  # 数据清洗测试脚本
+  ├── debug_akshare.py       # akshare调试脚本
+  └── env.sh                 # 环境变量配置脚本
+- README.md           # 详细说明文档
+
+🚀 快速启动：
+
+1. 环境准备：
+   pip install akshare sqlalchemy psycopg2-binary pandas
+
+2. 环境变量配置：
+   source test/env.sh
+   
+   或手动设置：
+   export PG_USER=your_username
+   export PG_PASSWORD=your_password
+   export PG_HOST_OUT=your_host
+   export PG_DB=your_database
+   export PG_PORT=5432
+
+3. 运行测试（推荐）：
+   cd test/
+   python test_imports.py      # 测试模块导入
+   python test_integration.py  # 测试数据整合逻辑
+   python performance_test.py  # 性能测试
+
+4. 启动同步：
+   python index.py
+
+🆕 模块化使用：
+
+1. 使用StockDataProcessor类：
+   python -c "
+   from data_processor import StockDataProcessor
+   processor = StockDataProcessor()
+   stats = processor.collect_all_stock_data()
+   print(f'处理统计: {stats}')
+   "
+
+2. 检查市场状态：
+   python -c "
+   from market_status import check_market_open_status
+   status = check_market_open_status()
+   print(f'市场状态: {status}')
+   "
+
+📊 支持的市场：
+
+• A股市场：
+  - 交易时间：09:30-11:30, 13:00-15:00
+  - 数据源：akshare.stock_zh_a_spot_em()
+  - 字段：代码、名称、最新价、涨跌额、涨跌幅等
+
+• 港股市场：
+  - 交易时间：09:30-12:00, 13:00-16:00
+  - 数据源：akshare.stock_hk_spot_em()
+  - 字段：代码、中文名称、英文名称、最新价等
+
+• 美股市场：
+  - 交易时间：21:30-04:00（夏令时）/ 22:30-05:00（冬令时）
+  - 数据源：akshare.stock_us_spot_em()
+  - 字段：代码、名称、最新价、涨跌幅等
+
+⚙️ 核心功能：
+
+1. 🆕 模块化架构：
+   - StockDataProcessor类封装核心逻辑
+   - 清晰的模块分离和职责划分
+   - 易于测试和维护的代码结构
+   - 统一的配置管理
+
+2. 智能市场检测：
+   - 自动检测各市场开盘状态
+   - 支持延迟检测（默认2小时）
+   - 夏令时/冬令时自动切换
+   - 基于北京时间的准确计算
+
+3. 数据清洗处理：
+   - 统一数据格式
+   - 数据类型转换
+   - 空值处理
+   - 时间戳标准化
+
+4. 数据库同步：
+   - 批量插入新记录
+   - 批量更新现有记录
+   - 标记删除失效记录
+   - 并发处理优化
+
+5. 错误处理：
+   - 网络异常重试
+   - 数据库连接重试
+   - 详细日志记录
+   - 异常恢复机制
+
+🔧 配置说明：
+
+• 批处理大小：1500条记录/批次
+• 并发线程数：2个线程
+• 最大重试次数：3次
+• 重试延迟：5秒
+
+📝 日志说明：
+
+日志格式：[时间] 级别 线程名 消息
+日志级别：INFO（默认）
+
+示例输出：
+[2024-01-15 09:30:00] INFO MainThread [A股] 开始获取实时行情数据...
+[2024-01-15 09:30:05] INFO MainThread [A股] 获取到 4500 条记录
+[2024-01-15 09:30:10] INFO MainThread [A股] 数据库同步完成
+
+⚠️ 注意事项：
+
+1. 确保数据库连接正常
+2. 检查网络连接稳定性
+3. 建议在市场开盘时间运行
+4. 定期检查日志文件
+5. 监控数据库存储空间
+
+🆘 故障排除：
+
+• 连接超时：检查网络和数据库配置
+• 数据为空：确认市场开盘状态
+• 导入错误：检查依赖包安装
+• 权限错误：确认数据库用户权限
+
+📞 技术支持：
+
+如遇问题，请检查：
+1. 环境变量配置
+2. 依赖包版本
+3. 数据库连接
+4. 日志错误信息
+
+运行测试脚本可快速定位问题。
